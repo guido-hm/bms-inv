@@ -655,28 +655,28 @@ def entrada(user_id):
 	button_create_cat = tk.Button(root_entrada, image= photo_entrada_create_cat, text='Create Catagory', font='Calibri 14', command=lambda:create_cat(root_entrada, user_id))
 	button_create_cat.place(relx=0.0225, rely=0.333, relwidth=0.2625, relheight=0.065)
 
-	entry_marca = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_marca = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_marca.place(relx=0.2975, rely=0.2425, relwidth=0.168, relheight=0.0625)
 
-	entry_modelo = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_modelo = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_modelo.place(relx=0.473, rely= 0.2425, relwidth=0.14, relheight=0.0625)
 
-	entry_serie = tk.Entry(root_entrada, bg=entrada_entry_color, state='normal', font='Calibri 14')
+	entry_serie = tk.Entry(root_entrada, bg=entrada_entry_color, state='normal', font='Calibri 14', justify='center')
 	entry_serie.place(relx=0.621, rely=0.2425, relwidth=0.147, relheight=0.0625)
 
-	entry_pais = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_pais = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_pais.place(relx=0.776, rely=0.2425, relwidth=0.112, relheight=0.0625)
 
-	entry_inv = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_inv = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_inv.place(relx=0.895, rely=0.2425, relwidth=0.094, relheight=0.0625)
 
 	text_descripcion = tk.Text(root_entrada, font='Calibri 14', wrap='word')
 	text_descripcion.place(relx=0.336, rely=0.434, relwidth=0.495, relheight=0.35)
 
-	entry_precio_base = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_precio_base = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_precio_base.place(relx=0.375, rely=0.895, relwidth=0.156, relheight=0.05)
 
-	entry_precio_ask = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14')
+	entry_precio_ask = tk.Entry(root_entrada, bg=entrada_entry_color, font='Calibri 14', justify='center')
 	entry_precio_ask.place(relx=0.6225, rely=0.895, relwidth=0.156, relheight=0.05)
 
 
@@ -967,6 +967,7 @@ def select_item(selection):
 	query = f"SELECT inv_num, brand, model, country, serial_number, description, base_price, price, import, category_id, import_user_id FROM individual_equipment WHERE inv_num = '{inv_num}'"
 
 	cur_main.execute(query)
+
 	
 
 def search_inventory(inv_num_object, brand_object, model_object, serial_number_object, category_object, listbox_inv, tables_list):
@@ -1269,6 +1270,13 @@ def connect_to_database():
 	global conn_main
 	conn_main = None
 
+	info_testing = ['hF8$!nfshGAgxPch', 'localhost', 'disable']
+	info_production = ['qF7gk3JFrE7Do49z6T', '23.239.24.84', 'require']
+
+	# Change this to move fromt esting to production and vice versa
+	info = info_production
+
+
 	# In PostgreSQL, default username is 'postgres' and password is 'postgres'.
 	# And also there is a default database exist named as 'postgres'.
 	# Default host is 'localhost' or '127.0.0.1'
@@ -1277,14 +1285,16 @@ def connect_to_database():
 	with open("postgres_user.txt") as f:
 		postgres_user = f.readline().rstrip()
 
+	if (info[1] == 'localhost'):
+		postgres_user = 'postgres'
 	# Connects to main database
 	conn_main = psycopg2.connect(
 		dbname=main_database_name,
 		user=postgres_user,
-		password="qF7gk3JFrE7Do49z6T",
-		host='23.239.24.84',
+		password=info[0],
+		host=info[1],
 		port='5432',
-		sslmode='require')
+		sslmode=info[2])
 	conn_main.autocommit = False
 
 
