@@ -482,7 +482,7 @@ def add_product_diff_desc_price(quantity, serial_inv_desc_price_list, specs_no_d
 		price_ask = serial_inv_desc_price_list[i][4]
 
 		insert_query = "INSERT INTO individual_equipment (inv_num, brand, model, country, serial_number, description, base_price, price, import_date, category_id, import_user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-		insert_data = (serie_num, marca, modelo, pais, serial_num, descripcion, precio_base, precio_ask, datetime.datetime.now(), category_id, user_id)
+		insert_data = (serial_num, marca, modelo, pais, serial_num, descripcion, precio_base, precio_ask, datetime.datetime.now(), category_id, user_id)
 		conn_main.commit()
 	tk.messagebox.showinfo("Import", "Item Added Successfully", parent=root_import)
 
@@ -959,16 +959,217 @@ def inventory():
 	button_exit.place(relx=0.91, rely=0.89, relwidth=0.08, relheight=0.06)
 
 def select_item(selection):
+	global stateInfo
 	print("SEL: ", selection)
 	print("Feature not yet available")
 	inv_num = selection.split()[0]
+	print("This the invnum: ", inv_num)
 
 
-	query = f"SELECT inv_num, brand, model, country, serial_number, description, base_price, price, import, category_id, import_user_id FROM individual_equipment WHERE inv_num = '{inv_num}'"
+	query = f"SELECT inv_num, brand, model, country, serial_number, description, base_price, price, import_date, export_date, category_id, import_user_id, export_user_id FROM individual_equipment WHERE UPPER(inv_num) = UPPER('{inv_num}')"
 
 	cur_main.execute(query)
+	item = cur_main.fetchone()
 
-	
+	print("ITEM: \n\n", item)
+	print(item[0])
+
+	root_select_item = tk.Toplevel()
+	root_select_item.attributes("-fullscreen", True)
+
+	frame_info = tk.Frame(root_select_item, borderwidth=2, relief='groove')
+	frame_info.place(relx=0.05, rely=0.05, relwidth=0.55, relheight=0.8)
+
+	frame_description = tk.Frame(root_select_item, borderwidth=2, relief='groove')
+	frame_description.place(relx=0.65, rely=0.05, relwidth=0.3, relheight=0.45)
+
+	frame_edits = tk.Frame(root_select_item, borderwidth=2, relief='groove')
+	frame_edits.place(relx=0.65, rely=0.55, relwidth=0.3, relheight=0.30)
+
+	button_close = tk.Button(root_select_item, text="CLOSE", font="Calibri 20", bg="light gray", command=lambda: save_exit_window(root_select_item))
+	button_close.place(relx=0.05, rely=0.875, relwidth=0.9, relheight=0.1)
+
+	# LABELS
+
+	label_inv_num = tk.Label(frame_info, text="BMS Num:", font='Calibri 20', anchor='e')
+	label_brand = tk.Label(frame_info, text="Brand:", font='Calibri 20', anchor='e')
+	label_model = tk.Label(frame_info, text="Model:", font='Calibri 20', anchor='e')
+	label_country = tk.Label(frame_info, text="Country:", font='Calibri 20', anchor='e')
+	label_serial = tk.Label(frame_info, text="Serial:", font='Calibri 20', anchor='e')
+	label_base_price = tk.Label(frame_info, text="Base Price:", font='Calibri 20', anchor='e')
+	label_price = tk.Label(frame_info, text="Price:", font='Calibri 20', anchor='e')
+	label_import_date = tk.Label(frame_info, text="Import Date:", font='Calibri 20', anchor='e')
+	label_export_date = tk.Label(frame_info, text="Export Date:", font='Calibri 20', anchor='e')
+	label_category = tk.Label(frame_info, text="Category:", font='Calibri 20', anchor='e')
+	label_import_user = tk.Label(frame_info, text="Import User:", font='Calibri 20', anchor='e')
+	label_export_user = tk.Label(frame_info, text="Export User", font='Calibri 20', anchor='e')
+
+	label_inv_num.place(relx=0.01, rely=0.01, relwidth=0.25, relheight=0.065)
+	label_brand.place(relx=0.01, rely=0.01+(0.065*1)+(0.01*1), relwidth=0.25, relheight=0.065)
+	label_model.place(relx=0.01, rely=0.01+(0.065*2)+(0.01*2), relwidth=0.25, relheight=0.065)
+	label_country.place(relx=0.01, rely=0.01+(0.065*3)+(0.01*3), relwidth=0.25, relheight=0.065)
+	label_serial.place(relx=0.01, rely=0.01+(0.065*4)+(0.01*4), relwidth=0.25, relheight=0.065)
+	label_base_price.place(relx=0.01, rely=0.01+(0.065*5)+(0.01*5), relwidth=0.25, relheight=0.065)
+	label_price.place(relx=0.01, rely=0.01+(0.065*6)+(0.01*6), relwidth=0.25, relheight=0.065)
+	label_import_date.place(relx=0.01, rely=0.01+(0.065*7)+(0.01*7), relwidth=0.25, relheight=0.065)
+	label_export_date.place(relx=0.01, rely=0.01+(0.065*8)+(0.01*8), relwidth=0.25, relheight=0.065)
+	label_category.place(relx=0.01, rely=0.01+(0.065*9)+(0.01*9), relwidth=0.25, relheight=0.065)
+	label_import_user.place(relx=0.01, rely=0.01+(0.065*10)+(0.01*10), relwidth=0.25, relheight=0.065)
+	label_export_user.place(relx=0.01, rely=0.01+(0.065*11)+(0.01*11), relwidth=0.25, relheight=0.065)
+
+
+	# Entries and Optionmenus
+
+	entry_inv_num = tk.Entry(frame_info, font='Calibri 20')
+	entry_brand = tk.Entry(frame_info, font='Calibri 20')
+	entry_model = tk.Entry(frame_info, font='Calibri 20')
+	entry_country = tk.Entry(frame_info, font='Calibri 20')
+	entry_serial = tk.Entry(frame_info, font='Calibri 20')
+	entry_base_price = tk.Entry(frame_info, font='Calibri 20')
+	entry_price = tk.Entry(frame_info, font='Calibri 20')
+	entry_import_date = tk.Entry(frame_info, font='Calibri 20')
+	entry_export_date = tk.Entry(frame_info, font='Calibri 20')
+	entry_category = tk.Entry(frame_info, font='Calibri 20')
+	entry_import_user = tk.Entry(frame_info, font='Calibri 20')
+	entry_export_user = tk.Entry(frame_info, font='Calibri 20')
+
+	entry_inv_num.place(relx=0.28, rely=0.01, relwidth=0.5, relheight=0.065)
+	entry_brand.place(relx=0.28, rely=0.01+(0.065*1)+(0.01*1), relwidth=0.5, relheight=0.065)
+	entry_model.place(relx=0.28, rely=0.01+(0.065*2)+(0.01*2), relwidth=0.5, relheight=0.065)
+	entry_country.place(relx=0.28, rely=0.01+(0.065*3)+(0.01*3), relwidth=0.5, relheight=0.065)
+	entry_serial.place(relx=0.28, rely=0.01+(0.065*4)+(0.01*4), relwidth=0.5, relheight=0.065)
+	entry_base_price.place(relx=0.28, rely=0.01+(0.065*5)+(0.01*5), relwidth=0.5, relheight=0.065) 
+	entry_price.place(relx=0.28, rely=0.01+(0.065*6)+(0.01*6), relwidth=0.5, relheight=0.065)
+	entry_import_date.place(relx=0.28, rely=0.01+(0.065*7)+(0.01*7), relwidth=0.5, relheight=0.065)
+	entry_export_date.place(relx=0.28, rely=0.01+(0.065*8)+(0.01*8), relwidth=0.5, relheight=0.065)
+	entry_category.place(relx=0.28, rely=0.01+(0.065*9)+(0.01*9), relwidth=0.5, relheight=0.065)
+	entry_import_user.place(relx=0.28, rely=0.01+(0.065*10)+(0.01*10), relwidth=0.5, relheight=0.065)
+	entry_export_user.place(relx=0.28, rely=0.01+(0.065*11)+(0.01*11), relwidth=0.5, relheight=0.065)
+
+	inv_num = item[0] # NOT EDITABLE
+	brand = item[1]
+	model = item[2]
+	country = item[3]
+	serial = item[4]
+	description = item[5]
+	base_price = item[6]
+	price = item[7]
+	import_date = item[8] # NOT EDITABLE 
+	import_date = str(import_date)[:16]
+
+	export_date = item[9] # NOT EDITABLE
+	if (export_date == None):
+		export_date = ""
+
+	category_id = item[10] # DROPDOWN
+	category = get_category(category_id)
+
+	import_user_id = item[11] # NOT EDITABLE
+	import_user = get_user(import_user_id)
+
+	export_user_id = item[12] # NOT EDITABLE
+	if (export_user_id == None):
+		export_user = ""
+	else:
+		export_user = get_user(export_user_id)
+
+
+	entry_inv_num.insert(0, inv_num)
+	entry_brand.insert(0, brand)
+	entry_model.insert(0, model)
+	entry_country.insert(0, country)
+	entry_serial.insert(0, serial)
+	entry_base_price.insert(0, base_price)
+	entry_price.insert(0, price)
+	entry_import_date.insert(0, import_date)
+	entry_export_date.insert(0, export_date)
+	entry_category.insert(0, category)
+	entry_import_user.insert(0, import_user)
+	entry_export_user.insert(0, export_user)
+
+	stateInfo = 0
+
+	entry_inv_num.config(state="readonly")
+	entry_brand.config(state="readonly")
+	entry_model.config(state="readonly")
+	entry_country.config(state="readonly")
+	entry_serial.config(state="readonly")
+	entry_base_price.config(state="readonly")
+	entry_price.config(state="readonly")
+	entry_import_date.config(state="readonly")
+	entry_export_date.config(state="readonly")
+	entry_category.config(state="readonly")
+	entry_import_user.config(state="readonly")
+	entry_export_user.config(state="readonly")
+
+	# Hospital Optionmenu created
+
+	category_list = []
+	cur_main.execute("SELECT category_name FROM individual_category")
+	categories = cur_main.fetchall()
+	for category_name in categories:
+		category_list.append(category_name[0])
+	category_var = tk.StringVar(frame_info)
+	category_var.set(category)
+	category_optionmenu = tk.OptionMenu(frame_info, category_var, *category_list)
+	# category_optionmenu.config(width=18)
+	category_optionmenu.config(font="Calibri 20")
+
+	# button_edit_info = tk.Button(frame_info, text="Edit", font="Calibri 20", bg='light gray', command=lambda:toggle_edit_info(root_select_item, entry_inv_num, entry_brand, entry_model, entry_country, entry_serial, entry_base_price, entry_price, entry_category, category_optionmenu))
+	# button_edit_info.place(relx=0.4, rely=0.91, relwidth=0.2, relheight=0.08)
+
+def toggle_edit_info(root, entry_inv_num, entry_brand, entry_model, entry_country, entry_serial, entry_base_price, entry_price, entry_category, category_optionmenu):
+	if (stateInfo == 0):
+		entry_inv_num.config(state="normal")
+		entry_brand.config(state="normal")
+		entry_model.config(state="normal")
+		entry_country.config(state="normal")
+		entry_serial.config(state="normal")
+		entry_base_price.config(state="normal")
+		entry_price.config(state="normal")
+
+		entry_category.grid_forget()
+
+		category_optionmenu.place(relx=0.28, rely=0.01+(0.065*9)+(0.01*9), relwidth=0.5, relheight=0.065)
+
+		stateInfo = 1
+
+	elif (stateInfo == 1):
+		entry_inv_num.config(state="readonly")
+		entry_brand.config(state="readonly")
+		entry_model.config(state="readonly")
+		entry_country.config(state="readonly")
+		entry_serial.config(state="readonly")
+		entry_base_price.config(state="readonly")
+		entry_price.config(state="readonly")
+
+		entry_category.place(relx=0.28, rely=0.01+(0.065*9)+(0.01*9), relwidth=0.5, relheight=0.065)
+
+		category_optionmenu.grid_forget()
+
+		stateInfo=0
+
+
+def save_exit_window(root):
+	save_data
+	exit_window(root)
+
+def save_data():
+	return
+
+def get_category(id):
+	query = f"SELECT category_name FROM individual_category WHERE id={id}"
+	cur_main.execute(query)
+	name = cur_main.fetchone()[0]
+	return name
+
+def get_user(id):
+	query = f"SELECT username FROM inv_user WHERE id={id}"
+	cur_main.execute(query)
+	username = cur_main.fetchone()[0]
+	return username
+
+
 
 def search_inventory(inv_num_object, brand_object, model_object, serial_number_object, category_object, listbox_inv, tables_list):
 
@@ -1008,9 +1209,11 @@ def search_inventory(inv_num_object, brand_object, model_object, serial_number_o
 			# If search parameter is a digit (hospital, company ID or any other digit data), it does not user "UPPER" in query"
 			if field_data[index].isdigit():
 				query_conditions_list.append( f"{field_names[index]} = '{field_data[index]}'")
+			elif (field_names[index] == "inv_num"):
+				query_conditions_list.append(f"UPPER({field_names[index]}) LIKE UPPER('{field_data[index]}%')")
 			else:
 				query_conditions_list.append( f"UPPER({field_names[index]}) = UPPER('{field_data[index]}')")
-	
+
 	query_conditions_string = " AND ".join(query_conditions_list)
 	
 	if query_conditions_string:
